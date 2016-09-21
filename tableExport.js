@@ -32,9 +32,34 @@ THE SOFTWARE.*/
 						pdfLeftMargin:20,
 						escape:'true',
 						htmlContent:'false',
-						consoleLog:'false'
+						consoleLog:'false',
+						name: 'file' // the name that will be shown to the user in the dialog.
 				};
-                
+                		
+                		// This is a function which opens up a 
+                		// download file dialog using an invisible
+                		// <a> tag. It solves the problem of long
+                		// and unusual names. So instead of using
+                		// windows.open(uri), we'll now use this 
+                		// cleaner way.
+                		function openDownloadFileDialog(name,uri) {
+
+					// Create an invisible link
+					var downloadLink = document.createElement("a");
+					
+					// set href
+					downloadLink.href = uri;
+
+					// set download name
+					downloadLink.download = name;
+
+					// open dialog
+					document.body.appendChild(downloadLink);
+					downloadLink.click();
+					document.body.removeChild(downloadLink);
+
+				}
+				
 				var options = $.extend(defaults, options);
 				var el = this;
 				
@@ -75,7 +100,13 @@ THE SOFTWARE.*/
 						console.log(tdData);
 					}
 					var base64data = "base64," + $.base64.encode(tdData);
-					window.open('data:application/'+defaults.type+';filename=exportData;' + base64data);
+					// Old method.
+					// window.open('data:application/'+defaults.type+';filename=exportData;' + base64data);
+					
+					
+					extension = (defaults.type == 'csv')?'.csv':'.txt';
+					// new method.
+					openDownloadFileDialog(defaults.name+extension,'data:application/'+defaults.type+';filename=exportData;' + base64data);
 				}else if(defaults.type == 'sql'){
 				
 					// Header
@@ -119,8 +150,11 @@ THE SOFTWARE.*/
 					}
 					
 					var base64data = "base64," + $.base64.encode(tdData);
-					window.open('data:application/sql;filename=exportData;' + base64data);
+					// Old method
+					//window.open('data:application/sql;filename=exportData;' + base64data);
 					
+					// new method.
+					openDownloadFileDialog(defaults.name+'.sql','data:application/sql;filename=exportData;' + base64data);
 				
 				}else if(defaults.type == 'json'){
 				
@@ -168,7 +202,11 @@ THE SOFTWARE.*/
 						console.log(JSON.stringify(jsonExportArray));
 					}
 					var base64data = "base64," + $.base64.encode(JSON.stringify(jsonExportArray));
-					window.open('data:application/json;filename=exportData;' + base64data);
+					//window.open('data:application/json;filename=exportData;' + base64data);
+					
+					openDownloadFileDialog(defaults.name+'.json','data:application/json;filename=exportData;' + base64data);
+					
+					
 				}else if(defaults.type == 'xml'){
 				
 					var xml = '<?xml version="1.0" encoding="utf-8"?>';
@@ -209,7 +247,9 @@ THE SOFTWARE.*/
 					}
 					
 					var base64data = "base64," + $.base64.encode(xml);
-					window.open('data:application/xml;filename=exportData;' + base64data);
+					//window.open('data:application/xml;filename=exportData;' + base64data);
+					
+					openDownloadFileDialog(defaults.name+'.xml','data:application/xml;filename=exportData;' + base64data);
 
 				}else if(defaults.type == 'excel' || defaults.type == 'doc'|| defaults.type == 'powerpoint'  ){
 					//console.log($(this).html());
@@ -276,14 +316,21 @@ THE SOFTWARE.*/
 					excelFile += "</html>";
 
 					var base64data = "base64," + $.base64.encode(excelFile);
-					window.open('data:application/vnd.ms-'+defaults.type+';filename=exportData.doc;' + base64data);
+					//window.open('data:application/vnd.ms-'+defaults.type+';filename=exportData.doc;' + base64data);
+					
+					var extension = 
+						(defaults.type == 'excel')?'.xls':
+						(defaults.type == 'doc')?'.doc':'.ppt';
+					
+					openDownloadFileDialog(defaults.name+extension,'data:application/vnd.ms-'+defaults.type+';filename=exportData.doc;' + base64data);
 					
 				}else if(defaults.type == 'png'){
 					html2canvas($(el), {
 						onrendered: function(canvas) {										
 							var img = canvas.toDataURL("image/png");
-							window.open(img);
+							//window.open(img);
 							
+							openDownloadFileDialog(defaults.name+'.png',img);
 							
 						}
 					});		
